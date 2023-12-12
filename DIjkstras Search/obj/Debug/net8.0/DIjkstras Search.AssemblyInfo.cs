@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DIjkstras Search")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b83f280bf95a02917e0ac8f67b4ee71c64b7f199")]
 [assembly: System.Reflection.AssemblyProductAttribute("DIjkstras Search")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DIjkstras Search")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
