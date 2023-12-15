@@ -9,50 +9,66 @@
     {
         static void Main(string[] args)
         {
+            Program p = new Program();
             Console.WriteLine("Hello, World!");
 
+            int[,] maze = new int[30, 50];
             int[,] maze1 = new int[30, 50];
-            int[,] maze2 = new int[30, 50];
-            int[,] maze3 = new int[30, 50];
 
 
-            maze1[0, 0] = 2;
-            maze1[29, 49] = 3;
-            maze2[0, 0] = 2;
-            maze2[29, 49] = 3;
+
+
+            //maze1[0, 0] = 2;
+            //maze1[29, 49] = 3;
+            //maze2[0, 0] = 2;
+            //maze2[29, 49] = 3;
             Point startCell = new(0, 0);
             Point endCell = new(29, 49);
-            maze1 = RandomMaze(maze1);
-            maze2 = maze1;
-            maze3 = maze1;
-            OutputMaze(maze1);
+            maze1 = p.RandomMaze(maze1);
 
-            List<Point> path3 = AStarSearch(maze3, startCell, endCell);
-            maze3 = UpdateMaze(maze3, path3);
+            p.OutputMaze(maze1);
+
+            List<Point> path = p.AStarSearch(maze1, startCell, endCell);
             Console.WriteLine("A Star");
-            OutputMaze(maze3);
-            foreach (Point p in path3) { Console.WriteLine(p); }
+            Array.Copy(p.UpdateMaze(maze1, path), maze, maze.Length);
+            p.OutputMaze(maze);
 
-            List<Point> path1 = DijkstraVersion2(maze1, startCell, endCell);
-            maze1 = UpdateMaze(maze1, path1);
-             Console.WriteLine("Dijkstras");
-            OutputMaze(maze1);
+            path = p.DijkstraVersion2(maze1, startCell, endCell);
+            Console.WriteLine("Dijkstras");
+            Array.Copy(p.UpdateMaze(maze1, path), maze, maze.Length);
+            p.OutputMaze(maze);
 
 
-            foreach (Point p in path1) { Console.WriteLine(p); }
-            List<Point> path2 = BreadthFirstSearch(maze2, startCell, endCell);
-            maze2 = UpdateMaze(maze2, path2);
+
+            path = p.BreadthFirstSearch(maze1, startCell, endCell);
             Console.WriteLine("Breadth First");
-            OutputMaze(maze2);
+            Array.Copy(p.UpdateMaze(maze1, path), maze, maze.Length);
+            p.OutputMaze(maze);
 
 
-            
+            //foreach (Point pp in path) { Console.WriteLine(pp); }
 
-            
+
+
+
+
+
             //Console.WriteLine(path1.Count() + " " + path2.Count + " " + path3.Count);
         }
 
-        static List<Point> DijkstraVersion2(int[,] maze, Point start, Point goal)
+        public static void Print2DArray<T>(T[,] matrix)
+        {
+            for (int i = 0; i < matrix.GetLength(0); i++)
+            {
+                for (int j = 0; j < matrix.GetLength(1); j++)
+                {
+                    Console.Write(matrix[i, j] + " ");
+                }
+                Console.WriteLine();
+            }
+        }
+
+        public List<Point> DijkstraVersion2(int[,] maze, Point start, Point goal)
         {
             UpPriQu Q = new();
             Dictionary<Point, Point> prev = [];
@@ -96,7 +112,7 @@
             return RecallPath(prev, goal);
         }
 
-        static List<Point> BreadthFirstSearch(int[,] maze, Point start, Point goal)
+        public List<Point> BreadthFirstSearch(int[,] maze, Point start, Point goal)
         {
             Queue<Point> Q = new();
             Dictionary<Point, Point> cameFrom = [];
@@ -133,7 +149,7 @@
 
         }
 
-        static List<Point> AStarSearch(int[,]  maze, Point start, Point goal)
+        public List<Point> AStarSearch(int[,]  maze, Point start, Point goal)
         {
             //This rendition of Updatable priority queue has the point then the fscore as thats what have to get minimum from
             UpPriQu Q = new UpPriQu();
@@ -183,7 +199,7 @@
            
         }
 
-        static List<Point> RecallPath(Dictionary<Point, Point> prev, Point goal)
+        public List<Point> RecallPath(Dictionary<Point, Point> prev, Point goal)
         {
             Point None = new(-1, -1);
             Point current = goal;
@@ -205,13 +221,14 @@
             return path;
         }
 
-        static int EuclidianDistance(Point start, Point goal)
+        public int EuclidianDistance(Point start, Point goal)
         {
             double h = Math.Sqrt(Math.Pow(start.X - goal.X, 2) + Math.Pow(start.Y - goal.Y, 2));
-            return (int)h;
+            //return (int)h;
+            return (int)Math.Round(h);
         }
 
-        static List<Point> Neighbours(int[,] maze, Point current)
+        public List<Point> Neighbours(int[,] maze, Point current)
         {
             int[] checksRows = [0, 0, 1, -1];
             int[] checksCols = [1, -1, 0, 0];
@@ -233,7 +250,7 @@
             }
             return neighbours;
         }
-        static int[,] RandomMaze(int[,] maze)
+        public int[,] RandomMaze(int[,] maze)
         {
             Random random = new();
             for (int i = 0; i < 200; i++)
@@ -248,8 +265,9 @@
             return maze;
         }
 
-        static void OutputMaze(int[,] maze)
+        public void OutputMaze(int[,] maze)
         {
+            int tally = 0;
             Console.BackgroundColor = ConsoleColor.White;
             for (int i = 0; i < maze.GetLength(0); i++)
             {
@@ -257,7 +275,7 @@
                 {
                     Console.BackgroundColor = ConsoleColor.White;
                     if (maze[i, j] == 1) { Console.BackgroundColor = ConsoleColor.Black; }
-                    else if (maze[i, j] == 9) { Console.BackgroundColor = ConsoleColor.Blue; }
+                    else if (maze[i, j] == 9) { Console.BackgroundColor = ConsoleColor.Blue;tally++; }
                     Console.Write(maze[i, j] + " ");
                     Console.BackgroundColor = ConsoleColor.Black;
 
@@ -265,21 +283,28 @@
                 Console.WriteLine();
             }
             Console.BackgroundColor = ConsoleColor.Black;
+            Console.WriteLine(tally);
         }
 
-        static int[,] UpdateMaze(int[,] maze, List<Point> path)
+        public int[,] UpdateMaze(int[,] maze, List<Point> path)
         {
-            
+            ////foreach (Point p in path) { Console.WriteLine(p); }
+            //Console.WriteLine("Before Update");
+            //OutputMaze(maze);
+            int[,] tempMaze = new int[30,50];
+            Array.Copy(maze, tempMaze, maze.Length);
             for (int i = 0; i < path.Count; i++)
             {
                 try
                 {
-                    if(maze[path[i].X, path[i].Y] == 1) { Console.WriteLine("mucked up here") ; continue; }
-                    maze[path[i].X, path[i].Y] = 9;
+                    if(tempMaze[path[i].X, path[i].Y] == 1) { Console.WriteLine("mucked up here") ; continue; }
+                    tempMaze[path[i].X, path[i].Y] = 9;
                 }
                 catch { Console.WriteLine("coordinates bad"); }
             }
-            return maze; 
+            //Console.WriteLine("After Update");
+            //OutputMaze(maze);
+            return tempMaze; 
             
         }
 

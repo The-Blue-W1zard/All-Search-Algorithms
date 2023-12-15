@@ -26,6 +26,8 @@ namespace DIjkstras_Search
             numItems = 0;
         }
 
+        public void Clear() { sortedDict.Clear(); }
+
         public void Enqueue(Point point, int value)
         {
             sortedDict.Add(point, value);
