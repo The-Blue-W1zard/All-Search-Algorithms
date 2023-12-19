@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using System.Drawing;
     using System.IO;
+    using System.Linq;
     using System.Runtime.Versioning;
 
     internal class Program
@@ -13,7 +14,14 @@
             Console.WriteLine("Hello, World!");
 
             int[,] maze = new int[30, 50];
-            int[,] maze1 = new int[10, 20];
+            int[,] maze1 = new int[30, 50];
+            int[,] maze2 = new int[30, 50];
+            int[,] maze3 = new int[30, 50];
+            int[,] maze4 = new int[30, 50];
+            int[,] maze5 = new int[30, 50];
+
+
+
 
 
 
@@ -23,29 +31,48 @@
             //maze2[0, 0] = 2;
             //maze2[29, 49] = 3;
             Point startCell = new(0, 0);
-            Point endCell = new(29, 49);
+            Point endCell = new(28, 48);
             maze1 = p.GenerateRowsCols(maze1);
-            p.CreateMaze(maze1, startCell);
+            //maze2 = p.GenerateRowsCols(maze2);
+            //maze3 = p.GenerateRowsCols(maze3);
+            //maze4 = p.GenerateRowsCols(maze4);
+            //maze5 = p.GenerateRowsCols(maze5);
+          
+
+            p.RandomizedDFSV2(maze1, startCell);
+            //p.RandomizedDFSV2(maze2, startCell);
+            //p.RandomizedDFSV2(maze3, startCell);
+            //p.RandomizedDFSV2(maze4, startCell);
+            //p.RandomizedDFSV2(maze5, startCell);
+
 
 
             p.OutputMaze(maze1);
+            //Console.WriteLine();
+            //p.OutputMaze(maze2);
+            //Console.WriteLine();
+            //p.OutputMaze(maze3);
+            //Console.WriteLine();
+            //p.OutputMaze(maze4);
+            //Console.WriteLine();
+            //p.OutputMaze(maze5);
 
-            //List<Point> path = p.AStarSearch(maze1, startCell, endCell);
-            //Console.WriteLine("A Star");
-            //Array.Copy(p.UpdateMaze(maze1, path), maze, maze.Length);
-            //p.OutputMaze(maze);
+            List<Point> path = p.AStarSearch(maze1, startCell, endCell);
+            Console.WriteLine("A Star");
+            Array.Copy(p.UpdateMaze(maze1, path), maze, maze.Length);
+            p.OutputMaze(maze);
 
-            //path = p.DijkstraVersion2(maze1, startCell, endCell);
-            //Console.WriteLine("Dijkstras");
-            //Array.Copy(p.UpdateMaze(maze1, path), maze, maze.Length);
-            //p.OutputMaze(maze);
+            path = p.DijkstraVersion2(maze1, startCell, endCell);
+            Console.WriteLine("Dijkstras");
+            Array.Copy(p.UpdateMaze(maze1, path), maze, maze.Length);
+            p.OutputMaze(maze);
 
 
 
-            //path = p.BreadthFirstSearch(maze1, startCell, endCell);
-            //Console.WriteLine("Breadth First");
-            //Array.Copy(p.UpdateMaze(maze1, path), maze, maze.Length);
-            //p.OutputMaze(maze);
+            path = p.BreadthFirstSearch(maze1, startCell, endCell);
+            Console.WriteLine("Breadth First");
+            Array.Copy(p.UpdateMaze(maze1, path), maze, maze.Length);
+            p.OutputMaze(maze);
 
 
             //foreach (Point pp in path) { Console.WriteLine(pp); }
@@ -63,6 +90,7 @@
             UpPriQu Q = new();
             Dictionary<Point, Point> prev = [];
             Point None = new(-1, -1);
+            int numExplored = 0;
 
             Console.WriteLine(maze.GetLength(0));
             Console.WriteLine(maze.GetLength(1));
@@ -81,6 +109,7 @@
             Point current;
             while (Q.Count > 0)
             {
+                numExplored++;
                 current = Q.Dequeue();
                 if (current == goal)
                 {
@@ -98,7 +127,7 @@
                     }                    
                 }               
             }
-            
+            Console.WriteLine(numExplored);
             return RecallPath(prev, goal);
         }
 
@@ -112,9 +141,11 @@
             Q.Enqueue(start);
             cameFrom[start] = None;
             Point CurrentCell;
+            int numExplored = 0;
 
             do
             {
+                numExplored++;
                 CurrentCell = Q.Dequeue();
                 if (CurrentCell.Equals(goal))
                 {
@@ -135,6 +166,7 @@
             }
             while (Q.Count > 0);
 
+            Console.WriteLine(numExplored);
             return RecallPath(cameFrom, goal);
 
         }
@@ -147,6 +179,7 @@
             Dictionary<Point, int> fScore = new();
             Dictionary<Point, Point> prev = new();
             Point None = new(-1, -1);
+            int numExplored = 0;
 
             for (int row = 0; row < maze.GetLength(0); row++)
             {
@@ -164,6 +197,7 @@
 
             while (Q.Count > 0)
             {
+                numExplored++;
                 Point current = Q.Dequeue();
                 if (current == goal) { break; }
 
@@ -183,8 +217,9 @@
 
                 }
 
-            }  
-            
+            }
+
+            Console.WriteLine(numExplored);
             return RecallPath (prev, goal);
            
         }
@@ -315,6 +350,89 @@
 
         }
 
+        public void RandomizedDFSV2(int[,] maze, Point start)
+        {
+            Queue<Point> queue = new Queue<Point>();
+            //Stack<Point> stack = new Stack<Point>();
+            List<Point> visited = new();
+            Point current = start;
+            Point next = new();
+            Point none = new(-1,-1);
+            queue.Enqueue(current);
+            visited.Add(current);
+
+            while (queue.Count > 0) 
+            {
+                
+
+                next = randomUnvisitedNeighbour(maze, current, ref visited);
+                //Console.WriteLine(next);
+                if (next == none)
+                {
+                    while (queue.Count > 0)
+                    {
+                        next = queue.Dequeue();
+                        //Console.WriteLine(next);
+                        if (NeighboursMazeGen(maze, next, visited).Count() > 0)
+                        {
+                            //Console.WriteLine(NeighboursMazeGen(maze, next, visited).Count());
+                            current = next;
+                            break;
+                        }
+                    }
+                    if (queue.Count == 0)
+                    {
+                        break;
+                    }
+                    
+                }
+
+                ConnectCells(maze, current, next);
+                current = next;
+                queue.Enqueue(current);
+                visited.Add(current);
+
+                //foreach (Point p in queue) { Console.Write(p); }
+                //Console.WriteLine();
+
+            }
+        }
+        public void RandomizedDFSV3(int[,] maze, Point start)
+        {
+            Random random = new Random();
+            Stack<Point> stack = new Stack<Point>();
+            List<Point> visited = new();
+            Point current = start;
+            Point next = new();
+            Point none = new(-1, -1);
+            stack.Push(current);
+            visited.Add(current);
+
+            while (stack.Count > 0)
+            {
+                current = stack.Peek();
+                List<Point> unvisitedNeighbours = NeighboursMazeGen(maze, current, visited);
+                //foreach (Point s in unvisitedNeighbours) { Console.Write(s); }
+                //Console.WriteLine();
+
+
+                if (unvisitedNeighbours.Count > 0)
+                {
+                    next = unvisitedNeighbours[random.Next(unvisitedNeighbours.Count)]; 
+                    ConnectCells(maze, current, next);
+                    visited.Add(current);
+                    stack.Push(next);
+
+                }
+                else { stack.Pop(); }
+
+                Console.Clear();
+                OutputMaze(maze);
+                
+
+            }
+        }
+
         public int[,] CreateMaze(int[,] maze, Point point)
         {
             Point start = point;
@@ -335,18 +453,18 @@
             Random rand = new();
             Point next = new(-1, -1);
             Point none = new(-1,-1);
-            List<Point> neighbours = NeighboursMazeGen(maze, vertex);
+            List<Point> neighbours = NeighboursMazeGen(maze, vertex,visited);
             while(neighbours.Count > 0)
             {
                 next = neighbours[rand.Next(neighbours.Count)];
                 neighbours.Remove(next);    
-                if (!visited.Contains(next)) {continue; }
+                if (!visited.Contains(next)) {break; }
                 next = none;
             }
             return next;
 
         }
-        public List<Point> NeighboursMazeGen(int[,] maze, Point current)
+        public List<Point> NeighboursMazeGen(int[,] maze, Point current, List<Point> visited)
         {
             int[] checksRows = [0, 0, 2, -2];
             int[] checksCols = [2, -2, 0, 0];
@@ -358,7 +476,7 @@
             {
                 try
                 {
-                    if (maze[row + checksRows[t], col + checksCols[t]] != 1)
+                    if (maze[row + checksRows[t], col + checksCols[t]] != 1 && !visited.Contains(new Point(row + checksRows[t], col + checksCols[t])))
                     {
                         neighbours.Add(new Point(row + checksRows[t], col + checksCols[t]));
                     }
