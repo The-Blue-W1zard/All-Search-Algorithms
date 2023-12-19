@@ -13,7 +13,7 @@
             Console.WriteLine("Hello, World!");
 
             int[,] maze = new int[30, 50];
-            int[,] maze1 = new int[30, 50];
+            int[,] maze1 = new int[10, 20];
 
 
 
@@ -24,26 +24,28 @@
             //maze2[29, 49] = 3;
             Point startCell = new(0, 0);
             Point endCell = new(29, 49);
-            maze1 = p.RandomMaze(maze1);
+            maze1 = p.GenerateRowsCols(maze1);
+            p.CreateMaze(maze1, startCell);
+
 
             p.OutputMaze(maze1);
 
-            List<Point> path = p.AStarSearch(maze1, startCell, endCell);
-            Console.WriteLine("A Star");
-            Array.Copy(p.UpdateMaze(maze1, path), maze, maze.Length);
-            p.OutputMaze(maze);
+            //List<Point> path = p.AStarSearch(maze1, startCell, endCell);
+            //Console.WriteLine("A Star");
+            //Array.Copy(p.UpdateMaze(maze1, path), maze, maze.Length);
+            //p.OutputMaze(maze);
 
-            path = p.DijkstraVersion2(maze1, startCell, endCell);
-            Console.WriteLine("Dijkstras");
-            Array.Copy(p.UpdateMaze(maze1, path), maze, maze.Length);
-            p.OutputMaze(maze);
+            //path = p.DijkstraVersion2(maze1, startCell, endCell);
+            //Console.WriteLine("Dijkstras");
+            //Array.Copy(p.UpdateMaze(maze1, path), maze, maze.Length);
+            //p.OutputMaze(maze);
 
 
 
-            path = p.BreadthFirstSearch(maze1, startCell, endCell);
-            Console.WriteLine("Breadth First");
-            Array.Copy(p.UpdateMaze(maze1, path), maze, maze.Length);
-            p.OutputMaze(maze);
+            //path = p.BreadthFirstSearch(maze1, startCell, endCell);
+            //Console.WriteLine("Breadth First");
+            //Array.Copy(p.UpdateMaze(maze1, path), maze, maze.Length);
+            //p.OutputMaze(maze);
 
 
             //foreach (Point pp in path) { Console.WriteLine(pp); }
@@ -54,18 +56,6 @@
 
 
             //Console.WriteLine(path1.Count() + " " + path2.Count + " " + path3.Count);
-        }
-
-        public static void Print2DArray<T>(T[,] matrix)
-        {
-            for (int i = 0; i < matrix.GetLength(0); i++)
-            {
-                for (int j = 0; j < matrix.GetLength(1); j++)
-                {
-                    Console.Write(matrix[i, j] + " ");
-                }
-                Console.WriteLine();
-            }
         }
 
         public List<Point> DijkstraVersion2(int[,] maze, Point start, Point goal)
@@ -306,6 +296,94 @@
             //OutputMaze(maze);
             return tempMaze; 
             
+        }
+
+        public void RandomizedDFS(int[,] maze, Point vertex, ref List<Point> visited)
+        {
+            Point none = new Point(-1,-1);
+            visited.Add(vertex);
+            Point next = randomUnvisitedNeighbour(maze,vertex,ref visited);
+
+            while(next != none)
+            {
+                ConnectCells(maze, vertex, next);
+                Console.Clear();
+                OutputMaze(maze);
+                RandomizedDFS(maze, next, ref visited);
+                next = randomUnvisitedNeighbour(maze,vertex,ref visited);
+            }
+
+        }
+
+        public int[,] CreateMaze(int[,] maze, Point point)
+        {
+            Point start = point;
+            List<Point> visited = new();
+            RandomizedDFS(maze, start, ref visited);
+            return maze;
+
+        }
+
+        public void ConnectCells(int[,] maze, Point first, Point second)
+        {
+            int row = (first.X + second.X) / 2;
+            int col = (first.Y + second.Y) / 2;
+            maze[row, col] = 0;
+        } 
+        public Point randomUnvisitedNeighbour(int[,] maze, Point vertex, ref List<Point> visited)
+        {
+            Random rand = new();
+            Point next = new(-1, -1);
+            Point none = new(-1,-1);
+            List<Point> neighbours = NeighboursMazeGen(maze, vertex);
+            while(neighbours.Count > 0)
+            {
+                next = neighbours[rand.Next(neighbours.Count)];
+                neighbours.Remove(next);    
+                if (!visited.Contains(next)) {continue; }
+                next = none;
+            }
+            return next;
+
+        }
+        public List<Point> NeighboursMazeGen(int[,] maze, Point current)
+        {
+            int[] checksRows = [0, 0, 2, -2];
+            int[] checksCols = [2, -2, 0, 0];
+            int row = current.X;
+            int col = current.Y;
+            List<Point> neighbours = [];
+
+            for (int t = 0; t < 4; t++)
+            {
+                try
+                {
+                    if (maze[row + checksRows[t], col + checksCols[t]] != 1)
+                    {
+                        neighbours.Add(new Point(row + checksRows[t], col + checksCols[t]));
+                    }
+
+                }
+                catch { }
+            }
+            return neighbours;
+        }
+
+
+        public int[,] GenerateRowsCols(int[,] maze)
+        {
+            //int r = maze.GetLength(0);
+            //int c = maze.GetLength(1);
+
+            for(int r = 0; r < maze.GetLength(0); r++)
+            {
+                for(int c = 0; c < maze.GetLength(1); c++)
+                {
+                    if (r%2 == 1) { maze[r, c] = 1; }
+                    if(c%2 == 1) { maze[r, c] = 1; }
+                }
+            }
+            return maze;
         }
 
     }
